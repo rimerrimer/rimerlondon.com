@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rimer London</title>
+<link rel="icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --platinum: #e8e8e8;
+    --platinum-2: #d6d6d6;
+    --platinum-3: #c6c6c6;
+    --shadow: #707070;
+    --black: #000;
+    --sel: #eeeee4;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    background: linear-gradient(90deg, #cfcfcf 25%, #d8d8d8 25%, #d8d8d8 50%, #cfcfcf 50%, #cfcfcf 75%, #d8d8d8 75%);
+    background-size: 6px 6px;
+    font-family: 'VT323', 'Monaco', 'Courier New', monospace;
+    color: #111;
+    overflow-x: hidden;
+    -webkit-font-smoothing: none;
+  }
+
+  #menubar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 24px;
+    background: var(--platinum);
+    border-bottom: 1px solid var(--shadow);
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    z-index: 50;
+    box-shadow: 1px 1px 0 #fff inset;
+  }
+
+  #menubar .apple-menu { display: flex; align-items: center; height: 24px; padding: 0 8px; cursor: pointer; }
+  #menubar .apple-menu svg { width: 15px; height: 15px; }
+
+  .menu { position: relative; height: 100%; }
+  .menu > .mt {
+    background: none; border: 0; cursor: default;
+    font-family: inherit; font-size: 17px; line-height: 24px;
+    padding: 0 10px; height: 24px; color: #111;
+  }
+  .menu.open { background: #111; }
+  .menu.open > .mt { color: #fff; }
+
+  .sub {
+    position: absolute; top: 24px; left: 0;
+    min-width: 190px;
+    background: var(--platinum);
+    border: 1px solid #000;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.25);
+    display: none;
+    z-index: 60;
+    padding: 2px;
+  }
+  .menu.open .sub { display: block; }
+  .sub button {
+    display: block; width: 100%; text-align: left;
+    background: none; border: 0; cursor: default;
+    font-family: inherit; font-size: 17px; color: #111;
+    padding: 1px 8px; line-height: 1.3;
+  }
+  .sub button:hover { background: var(--sel); }
+  .sub .sep { border-top: 1px solid #9a9a9a; margin: 3px 1px; }
+  .sub button.checked::after { content: " \2713"; }
+  .sub button.dim { color: #9a9a9a; }
+
+  .desktop {
+    position: relative;
+    min-height: 100vh;
+    padding-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .apple-hero { position: absolute; top: 0; left: 12px; padding: 6px; }
+  .apple-hero svg { width: 30px; height: 32px; filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.35)); animation: floaty 4s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+  .os9-window {
+    margin-top: 34px;
+    width: min(760px, 94vw);
+    background: linear-gradient(180deg, #fff 0%, #f4f4f4 55%, #dfdfdf 100%);
+    border: 1px solid #000;
+    box-shadow: 5px 6px 0 rgba(0,0,0,0.28), 1px 1px 0 #fff inset, -1px -1px 0 #8c8c8c inset;
+    position: relative;
+  }
+  .os9-window::after {
+    content: "";
+    position: absolute; right: 5px; bottom: 5px;
+    width: 13px; height: 13px;
+    border: 1px solid #7a7a7a;
+    background:
+      linear-gradient(135deg, #7a7a7a 25%, #fff 25%, #fff 40%, #7a7a7a 40%, #7a7a7a 55%, #fff 55%, #fff 70%, #7a7a7a 70%);
+    background-size: 6px 6px;
+  }
+
+  .titlebar {
+    height: 22px;
+    background: linear-gradient(180deg, #fff, #d4d4d4);
+    border-bottom: 1px solid #9c9c9c;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    font-size: 15px; letter-spacing: 1px;
+    text-align: center;
+    color: #111;
+  }
+  .closebox {
+    position: absolute; left: 6px; top: 3px;
+    width: 13px; height: 13px;
+    border: 1px solid #000;
+    background: var(--platinum);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; line-height: 1;
+    cursor: default;
+  }
+  .closebox:hover { background: #fff; }
+
+  #garden {
+    display: block;
+    width: 100%;
+    height: auto;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: #000;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .statusbar {
+    height: 22px;
+    border-top: 1px solid #fff;
+    background: var(--platinum);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 15px; padding: 0 8px;
+  }
+  .statusbar .st { color: #444; }
+
+  .icons {
+    margin: 26px 10px 30px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 26px 34px;
+    max-width: 860px;
+  }
+  .desk-icon {
+    text-align: center;
+    width: 74px;
+    text-decoration: none;
+    color: #111;
+    cursor: default;
+  }
+  .desk-icon svg { width: 40px; height: 40px; filter: drop-shadow(1px 1px 0 rgba(255,255,255,0.6)); }
+  .desk-icon .lbl {
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 1.1;
+    padding: 1px;
+    background: rgba(255,255,255,0.25);
+  }
+  .desk-icon:hover svg { animation: breathe 0.7s ease-in-out 2; }
+  .desk-icon:hover .lbl { background: #fff; box-shadow: 0 0 0 1px #000; color: #000; }
+  .desk-icon:active svg { transform: scale(0.92); }
+  @keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+  .hint {
+    padding-bottom: 26px;
+    font-size: 16px;
+    color: #333;
+    text-align: center;
+  }
+  .hint b { background: #fff; padding: 0 4px; border: 1px solid #777; }
+
+  #dialog {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.25);
+    display: none;
+    align-items: center; justify-content: center;
+  }
+  #dialog.show { display: flex; }
+  .dwin {
+    min-width: 300px;
+    max-width: 420px;
+    background: linear-gradient(180deg, #fff 0%, #e6e6e6 100%);
+    border: 1px solid #000;
+    box-shadow: 5px 6px 12px rgba(0,0,0,0.4), 1px 1px 0 #fff inset, -1px -1px 0 #8c8c8c inset;
+    padding-bottom: 8px;
+  }
+  .dwin .ttl { height: 20px; border-bottom: 1px solid #9c9c9c; background: linear-gradient(180deg,#fff,#d4d4d4); text-align: center; font-size: 14px; line-height: 20px; }
+  .dwin .body { padding: 16px 18px; font-size: 18px; line-height: 1.35; }
+  .dwin .btns { text-align: center; padding: 4px 0 6px; }
+  .dwin button {
+    min-width: 84px;
+    font-family: inherit; font-size: 17px;
+    background: var(--platinum);
+    border: 1px solid #000;
+    box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #888 inset;
+    padding: 3px 10px;
+  }
+  .dwin button:active { box-shadow: 1px 1px 0 #888 inset, -1px -1px 0 #fff inset; transform: translate(1px,1px); }
+
+  body.sleep #menubar, body.sleep .os9-window, body.sleep .icons, body.sleep .apple-hero { filter: brightness(0.4) saturate(0.35); }
+  body.sleep #menubar { pointer-events: none; }
+
+  @media (max-width: 560px) {
+    .menu.m-hide { display: none; }
+    .os9-window { margin-top: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="menubar">
+  <div class="menu m-apple" id="mApple">
+    <div class="apple-menu">
+      <svg viewBox="0 0 33 36" shape-rendering="crispEdges">
+        <rect x="10" y="2" width="4" height="4" fill="#4caf50"/>
+        <rect x="14" y="4" width="2" height="2" fill="#4caf50"/>
+        <rect x="6" y="4" width="4" height="4" fill="#ff4136"/>
+        <rect x="4" y="8" width="6" height="4" fill="#ff4136"/>
+        <rect x="2" y="12" width="8" height="4" fill="#ff851b"/>
+        <rect x="2" y="16" width="8" height="4" fill="#ffdc33"/>
+        <rect x="4" y="20" width="8" height="4" fill="#2ecc40"/>
+        <rect x="6" y="24" width="8" height="4" fill="#39cccc"/>
+        <rect x="8" y="28" width="8" height="4" fill="#0074d9"/>
+        <rect x="10" y="32" width="8" height="4" fill="#b10dc9"/>
+      </svg>
+    </div>
+    <div class="sub">
+      <button data-action="about">About This Garden</button>
+      <button class="dim">Apple System Properties...</button>
+      <div class="sep"></div>
+      <button data-action="beep">Mute Arm</button>
+    </div>
+  </div>
+  <div class="menu"><button class="mt">File</button><div class="sub">
+    <button data-action="reset">New Garden</button>
+    <button data-action="beep">Open...</button>
+    <button class="dim">Close Window</button>
+    <div class="sep"></div>
+    <button data-action="print">Print Garden...</button>
+  </div></div>
+  <div class="menu m-hide"><button class="mt">Edit</button><div class="sub">
+    <button class="dim">Undo</button>
+    <div class="sep"></div>
+    <button class="dim">Cut</button>
+    <button class="dim">Copy</button>
+    <button class="dim">Paste</button>
+  </div></div>
+  <div class="menu m-hide"><button class="mt">View</button><div class="sub">
+    <button data-action="bob" class="checked" id="vBob">Step Bob</button>
+    <button data-action="uv">Unlimited Walk</button>
+  </div></div>
+  <div class="menu"><button class="mt">Special</button><div class="sub">
+    <button data-action="sleep">Sleep</button>
+    <button data-action="beep">Eject Disk</button>
+    <div class="sep"></div>
+    <button data-action="beep">Empty Trash</button>
+  </div></div>
+</div>
+
+<div class="desktop">
+  <div class="apple-hero">
+    <svg viewBox="0 0 33 36" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="10" y="2" width="4" height="4" fill="#4caf50"/>
+      <rect x="14" y="4" width="2" height="2" fill="#4caf50"/>
+      <rect x="6" y="4" width="4" height="4" fill="#ff4136"/>
+      <rect x="4" y="8" width="6" height="4" fill="#ff4136"/>
+      <rect x="2" y="12" width="8" height="4" fill="#ff851b"/>
+      <rect x="2" y="16" width="8" height="4" fill="#ffdc33"/>
+      <rect x="4" y="20" width="8" height="4" fill="#2ecc40"/>
+      <rect x="6" y="24" width="8" height="4" fill="#39cccc"/>
+      <rect x="8" y="28" width="8" height="4" fill="#0074d9"/>
+      <rect x="10" y="32" width="8" height="4" fill="#b10dc9"/>
+    </svg>
+  </div>
+
+  <div class="os9-window">
+    <div class="titlebar"><span class="closebox" id="closeBox">&#10005;</span>RIMER LONDON &#9834; GARDEN</div>
+    <canvas id="garden" width="360" height="225"></canvas>
+    <div class="statusbar" id="statusbar">
+      <span class="st">1 item</span>
+      <span class="st" id="walkSt">walking &#10132; click to pause</span>
+    </div>
+  </div>
+
+  <div class="icons">
+    <a class="desk-icon" href="/portfolio">
+      <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" fill="#f6c453" stroke="#000" stroke-width="1.4"/><rect x="2" y="4" width="20" height="4" fill="#e8a33d" stroke="#000" stroke-width="1.4"/><rect x="2" y="4" width="6" height="3" fill="#f6c453" stroke="#000" stroke-width="1"/></svg>
+      <span class="lbl">Portfolio</span>
+    </a>
+    <a class="desk-icon" href="http://open.spotify.com/artist/4Kdb6rwgdSPx0P2AUhvdee" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#1db954" stroke="#000"/><path d="M7 14.2c3-1.2 6.6-1.2 9.7.1" fill="none" stroke="#000" stroke-width="2"/><path d="M6.4 11.4c3.6-1.4 7.9-1.3 11.5.3" fill="none" stroke="#000" stroke-width="2"/><path d="M5.8 8.7c4.2-1.6 9-1.5 12.9.5" fill="none" stroke="#000" stroke-width="2"/></svg>
+      <span class="lbl">Spotify</span>
+    </a>
+    <a class="desk-icon" href="http://instagram.com/rimerlondon" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><defs><linearGradient id="ig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fd5"/><stop offset="0.4" stop-color="#f63"/><stop offset="0.65" stop-color="#d5388e"/><stop offset="1" stop-color="#755dd0"/></linearGradient></defs><rect x="3" y="3" width="18" height="18" rx="5" fill="url(#ig)" stroke="#000"/><circle cx="12" cy="12" r="4" fill="none" stroke="#fff" stroke-width="2"/><circle cx="17.2" cy="6.8" r="1.2" fill="#fff"/></svg>
+      <span class="lbl">Instagram</span>
+    </a>
+    <a class="desk-icon" href="http://twitter.com/rimerlondon" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#1da1f2" stroke="#000"/><path d="M7 16.5c2.2 1.8 5 1.6 6.3.4 1-1 1.4-2.5.9-4 .6-1 2-1.8 2-1.8-.5.2-1 .3-1.5.3.6-.5 1-1.2 1.1-2-.6.4-1.3.7-2 .8a3.4 3.4 0 00-5.8 3.1c-2.2-.1-4.1-1.2-5.4-2.9-.5.9-.7 1.7-.5 2.6 1.1-.5 2-.6 2.8-.6-1 .7-1.5 1.7-1.5 2.9.8-.4 1.5-.6 2.2-.6-.6.7-1 1.6-.7 2.5z" fill="#fff"/></svg>
+      <span class="lbl">Twitter</span>
+    </a>
+    <a class="desk-icon" href="http://soundcloud.com/rimer" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#ff5500" stroke="#000"/><circle cx="12" cy="12" r="3.4" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="1.4" fill="#fff"/></svg>
+      <span class="lbl">SoundCloud</span>
+    </a>
+    <a class="desk-icon" href="https://music.apple.com/nl/artist/rimer-london/351480381" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><defs><linearGradient id="am" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fb5c74"/><stop offset="1" stop-color="#fa233b"/></linearGradient></defs><rect x="3" y="3" width="18" height="18" rx="3" fill="url(#am)" stroke="#000"/><path d="M13.5 6.5 18 5.8v7.4a2.6 2.6 0 01-2.6-2.6c0-1.1.9-1.8 2-2v-3.5l-3.2.55v7.9a2.6 2.6 0 01-2.6-2.6c0-1.1.9-1.8 2-2V5.6z" fill="#fff"/></svg>
+      <span class="lbl">Apple Music</span>
+    </a>
+    <a class="desk-icon" href="https://www.mixcloud.com/rimer-london/" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="#52a8ff" stroke="#000"/><path d="M6.5 14.5c3 .5 8 .3 11-1.2M6 12c3 .6 8 .4 11-1M5.6 9.6c3 .6 8 .3 11-1" fill="none" stroke="#fff" stroke-width="1.8"/></svg>
+      <span class="lbl">Mixcloud</span>
+    </a>
+  </div>
+
+  <div class="hint">windows-style walking garden &mdash; click the <b>window</b> to pause</div>
+</div>
+
+<div id="dialog"><div class="dwin">
+  <div class="ttl" id="dlgTitle">Info</div>
+  <div class="body" id="dlgBody"></div>
+  <div class="btns"><button id="dlgOk">OK</button></div>
+</div></div>
+
+<script>
+(function () {
+  var cv = document.getElementById('garden');
+  var ctx = cv.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  var W = cv.width, H = cv.height;
+  var horizonY = 122;
+
+  cv.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    if (sleep) { goSleep(); return; }
+    paused = !paused;
+    setWalkLabel();
+  });
+
+  var paused = false;
+  var sleep = false;
+  var bob = true;
+
+  function setWalkLabel() {
+    var el = document.getElementById('walkSt');
+    el.textContent = sleep ? 'asleep \u2716 click to wake'
+      : paused ? 'paused \u23f8 click to walk'
+      : 'walking \u27a1 click to pause';
+  }
+
+  var A = 17, OMEGA = 0.05;
+  var eyeY = 24, FL = 205;
+
+  function centerX(z) { return A * Math.sin(OMEGA * z); }
+  function hw(n) {
+    n = (n << 13) ^ n;
+    return 1 - ((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.5;
+  }
+  function hr(n) { return Math.floor((hw(n) * 0.5 + 0.5) * 100); }
+
+  var shade = [
+    ['#cff0b4', '#8fd05c', '#5aaf3c', '#498f30', '#377024', '#2a5a1c'],
+    ['#fff0cf', '#f0d58f', '#e0b75f', '#c99c4a', '#a8843c', '#8a6a30']
+  ];
+
+  function drawSky(t) {
+    var top = [
+      ['#9cd4ff', '#a8dcff', '#a8dcff', '#b7e3ff']
+    ][0];
+    for (var y = 0; y < horizonY; y += 4) {
+      var g = top[Math.floor((y / 4) % 4)];
+      ctx.fillStyle = g;
+      ctx.fillRect(0, y, W, y + 4 > horizonY ? horizonY - y : 4);
+    }
+
+    var sunX = Math.round(W * 0.74 + Math.sin(t * 0.04) * 3);
+    var sunY = 66;
+    ctx.fillStyle = '#ffe37a';
+    ctx.fillRect(sunX - 11, sunY - 11, 22, 22);
+    ctx.fillStyle = '#ffe9a0';
+    ctx.fillRect(sunX - 6, sunY - 6, 12, 12);
+    ctx.fillRect(sunX - 10, sunY, 20, 2);
+    ctx.fillRect(sunX, sunY - 10, 2, 20);
+
+    var clouds = [[46, 30], [160, 54], [268, 24]];
+    for (var i = 0; i < clouds.length; i++) {
+      var c = clouds[i];
+      var x = ((c[0] + t * 4) % (W + 80)) - 40;
+      var y = c[1];
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.fillRect(Math.round(x), y, 26, 7);
+      ctx.fillRect(Math.round(x) + 6, y - 4, 18, 7);
+      ctx.fillRect(Math.round(x) + 13, y + 7, 20, 6);
+    }
+
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.fillRect(0, horizonY - 4, W, 6);
+    ctx.fillStyle = '#3c7d2e';
+    ctx.fillRect(0, horizonY, W, 2);
+  }
+
+  function groundDepth(yRow) {
+    if (yRow <= horizonY) return 9999;
+    return FL * eyeY / (yRow - horizonY);
+  }
+
+  function drawGround() {
+    for (var y = horizonY + 2; y < H; y += 4) {
+      var d = groundDepth(y);
+      var t = Math.min(d / 420, 1);
+      var band = Math.min(5, Math.floor(t * 6));
+      ctx.fillStyle = shade[0][band];
+      var h = Math.min(4, H - y);
+      ctx.fillRect(0, y, W, h);
+    }
+
+    var camZ = cam.z;
+    var tiles = [];
+    var stepP = 16;
+    var near = 8;
+    var tileZ = Math.ceil(camZ / stepP) * stepP;
+    for (; tileZ < camZ + 420; tileZ += stepP) {
+      var zEnd = tileZ + stepP;
+      if (zEnd < camZ + near) continue;
+      var z0 = tileZ, z1 = zEnd;
+      var cx0 = centerX(z0), cx1 = centerX(z1);
+      var half = 15;
+      var p0 = proj(cx0 - half, 0, z0), p1 = proj(cx1 - half, 0, z1);
+      var p2 = proj(cx1 + half, 0, z1), p3 = proj(cx0 + half, 0, z0);
+      if (!p0 || !p1 || !p2 || !p3) continue;
+      var d = p0.along;
+      var band = Math.min(5, Math.floor((d / 420) * 6));
+      ctx.fillStyle = shade[1][band];
+      ctx.beginPath();
+      ctx.moveTo(p0.sx, p0.sy);
+      ctx.lineTo(p1.sx, p1.sy);
+      ctx.lineTo(p2.sx, p2.sy);
+      ctx.lineTo(p3.sx, p3.sy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';
+      ctx.fillRect(Math.min(p0.sx, p3.sx), Math.min(p0.sy, p3.sy),
+        Math.abs(p3.sx - p0.sx) || 1, 2);
+    }
+  }
+
+  function proj(wx, wy, wz) {
+    var dx = wx - cam.x, dz = wz - cam.z;
+    var along = dx * Math.sin(cam.h) + dz * Math.cos(cam.h);
+    if (along < 0.5) return null;
+    var right = dx * Math.cos(cam.h) - dz * Math.sin(cam.h);
+    var s = FL / along;
+    var sx = W / 2 + right * s;
+    var sy = horizonY - (wy - cam.y) * s;
+    return { sx: sx, sy: sy, s: s, along: along };
+  }
+
+  var cam = { x: 0, y: eyeY, z: 0, h: 0 };
+
+  function laneOf(i) {
+    var lanes = [-60, -38, 38, 60];
+    return lanes[i % lanes.length];
+  }
+
+  function collect() {
+    var out = [];
+    var chunk = 38;
+    var base = Math.floor(cam.z / chunk);
+    for (var n = base; n <= base + 14; n++) {
+      var zw = n * chunk;
+      for (var l = 0; l < 4; l++) {
+        var r = hr(n * 7 + l * 13);
+        if (r < 20) continue;
+        var oz = zw + 18 + (r % 20);
+        var ox = centerX(oz) + laneOf(l + n);
+        if (oz < cam.z + 6) continue;
+        var t = hr(n * 31 + l * 47) % 100;
+        var kind = t < 45 ? 'tree' : t < 68 ? 'pine' : t < 78 ? 'bush' : t < 86 ? 'flowers' : t < 92 ? 'mailbox' : t < 97 ? 'lantern' : 'cube';
+        out.push({ k: kind, x: ox, z: oz, v: r });
+      }
+      if (n % 8 === 4) {
+        out.push({ k: 'arch', x: centerX(zw + 4) , z: zw + 4, v: n });
+      }
+    }
+    out.sort(function (a, b) {
+      var pa = proj(a.x, 0, a.z), pb = proj(b.x, 0, b.z);
+      return (pb ? pb.along : 9999) - (pa ? pa.along : 9999);
+    });
+    return out;
+  }
+
+  var TREES = ['#4f9d3c', '#57ae42', '#65b94e', '#438b30'];
+
+  function drawTree(p, v) {
+    var w = 3 * p.s + 2;
+    var th = 15 * p.s;
+    ctx.fillStyle = '#7a4a26';
+    ctx.fillRect(Math.round(p.sx - w / 2), Math.round(p.sy - th), Math.round(w), Math.round(th));
+    var rr = (9 + v % 5) * p.s;
+    var cx = p.sx, cy = p.sy - th - rr * 0.7;
+    ctx.fillStyle = TREES[v % TREES.length];
+    ctx.fillRect(Math.round(cx - rr), Math.round(cy - rr), Math.round(rr * 2), Math.round(rr * 2));
+    ctx.fillStyle = '#fff';
+    ctx.globalAlpha = 0.22;
+    ctx.fillRect(Math.round(cx - rr * 0.7), Math.round(cy - rr * 0.7), Math.round(rr * 0.7), Math.round(rr * 0.6));
+    ctx.globalAlpha = 1;
+  }
+
+  function drawPine(p, v) {
+    var w = 8 * p.s;
+    var layers = 3;
+    for (var i = 0; i < layers; i++) {
+      var lw = w * (1 - i * 0.28);
+      var lh = 8 * p.s;
+      var ly = p.sy - (i + 1) * (lh + 1);
+      ctx.fillStyle = i % 2 ? '#2f7a24' : '#3c8f2e';
+      ctx.fillRect(Math.round(p.sx - lw / 2), Math.round(ly), Math.round(lw), Math.round(lh + 3 * p.s));
+    }
+    ctx.fillStyle = '#6b4426';
+    ctx.fillRect(Math.round(p.sx - 2 * p.s), Math.round(p.sy - 6 * p.s), Math.round(4 * p.s), Math.round(6 * p.s));
+  }
+
+  function drawBush(p, v) {
+    ctx.fillStyle = v % 2 ? '#4f9d3c' : '#57ae42';
+    ctx.fillRect(Math.round(p.sx - 8 * p.s), Math.round(p.sy - 9 * p.s), Math.round(16 * p.s), Math.round(9 * p.s));
+    ctx.fillStyle = '#fff';
+    ctx.globalAlpha = 0.18;
+    ctx.fillRect(Math.round(p.sx - 8 * p.s), Math.round(p.sy - 9 * p.s), Math.round(8 * p.s), Math.round(5 * p.s));
+    ctx.globalAlpha = 1;
+  }
+
+  function drawFlowers(p, v) {
+    var cols = ['#ff6ec7', '#ffe14d', '#ff8f3c', '#c07fff'];
+    var n = 5;
+    for (var i = 0; i < n; i++) {
+      var ox = (i * 5) % 12 - 6;
+      var fs = Math.max(1, 2 * p.s);
+      ctx.fillStyle = cols[(v + i) % cols.length];
+      ctx.fillRect(Math.round(p.sx + ox * p.s), Math.round(p.sy + (i % 3) * 2 * p.s), Math.round(fs), Math.round(fs));
+    }
+  }
+
+  function drawMailbox(p) {
+    var w = Math.max(2, 8 * p.s);
+    var h = Math.max(2, 12 * p.s);
+    ctx.fillStyle = '#9a9a9a';
+    ctx.fillRect(Math.round(p.sx - w * 0.4), Math.round(p.sy - h), Math.round(w * 0.8), Math.round(h));
+    ctx.fillStyle = '#e0442e';
+    ctx.fillRect(Math.round(p.sx - w), Math.round(p.sy - h - 8 * p.s), Math.round(w * 2), Math.round(8 * p.s));
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(Math.round(p.sx - w + 2), Math.round(p.sy - h - 7 * p.s), Math.round(w * 0.8), Math.round(2 * p.s));
+  }
+
+  function drawLantern(p) {
+    ctx.fillStyle = '#5a5a5a';
+    ctx.fillRect(Math.round(p.sx - 1.5 * p.s), Math.round(p.sy - 18 * p.s), Math.round(3 * p.s), Math.round(18 * p.s));
+    ctx.fillStyle = '#ffd75e';
+    ctx.fillRect(Math.round(p.sx - 4 * p.s), Math.round(p.sy - 23 * p.s), Math.round(8 * p.s), Math.round(8 * p.s));
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#ffe9a0';
+    ctx.fillRect(Math.round(p.sx - 7 * p.s), Math.round(p.sy - 26 * p.s), Math.round(14 * p.s), Math.round(14 * p.s));
+    ctx.globalAlpha = 1;
+  }
+
+  function drawCube(p, v) {
+    var s = Math.max(1, 6 * p.s);
+    ctx.fillStyle = v % 2 ? '#7fd3ff' : '#ffe14d';
+    ctx.fillRect(Math.round(p.sx), Math.round(p.sy + 14 * p.s + (v % 3) * 4 * p.s), Math.round(s), Math.round(s));
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    var fs = Math.round(s / 2);
+    ctx.fillRect(Math.round(p.sx), Math.round(p.sy + 14 * p.s + (v % 3) * 4 * p.s + fs), fs, fs);
+    ctx.fillRect(Math.round(p.sx + fs), Math.round(p.sy + 14 * p.s + (v % 3) * 4 * p.s), fs, fs);
+  }
+
+  function drawArch(p) {
+    var w = 14, th = 3.4;
+    var top = 60;
+    var li = proj(p.x - w, 0, p.z), ri = proj(p.x + w, 0, p.z);
+    if (!li || !ri) return;
+    ctx.fillStyle = '#8a6a45';
+    ctx.fillRect(Math.round(li.sx - th * li.s), Math.round(li.sy - top * li.s), Math.round(th * li.s * 2), Math.round(top * li.s));
+    ctx.fillRect(Math.round(ri.sx - th * ri.s), Math.round(ri.sy - top * ri.s), Math.round(th * ri.s * 2), Math.round(top * ri.s));
+    var by = Math.max(li.sy, ri.sy) - top * li.s;
+    ctx.fillStyle = '#2f6fd0';
+    ctx.fillRect(Math.round(li.sx - th * li.s), Math.round(by), Math.round(ri.sx - li.sx + th * ri.s), Math.round(8 * li.s));
+    ctx.fillStyle = '#fff';
+    var fsize = Math.max(3, Math.round(6.5 * li.s));
+    ctx.font = fsize + "px 'Courier New', monospace";
+    ctx.textAlign = 'center';
+    ctx.fillText('RIMER LONDON', Math.round(p.sx), Math.round(by + 8 * li.s));
+  }
+
+  var tPrev = 0, tElapsed = 0;
+
+  function frame(ts) {
+    requestAnimationFrame(frame);
+    var t = ts / 1000;
+    var dt = Math.min(0.05, (ts - tPrev) / 1000 || 0.016);
+    tPrev = ts;
+    tElapsed = t;
+
+    if (!paused && !sleep) {
+      var spd = 26;
+      cam.z += spd * dt;
+      var px = centerX(cam.z);
+      cam.x += (px - cam.x) * 0.1;
+      var tan = A * OMEGA * Math.cos(OMEGA * cam.z);
+      cam.h = Math.atan2(tan, 1);
+      cam.y = eyeY + (bob ? Math.sin(cam.z * 0.6) : 0);
+    }
+
+    drawSky(t);
+    drawGround();
+
+    var objs = collect();
+    for (var i = 0; i < objs.length; i++) {
+      var o = objs[i];
+      var p = proj(o.x, 0, o.z);
+      if (!p || p.sx < -60 || p.sx > W + 60) continue;
+      if (o.k === 'tree') drawTree(p, o.v);
+      else if (o.k === 'pine') drawPine(p, o.v);
+      else if (o.k === 'bush') drawBush(p, o.v);
+      else if (o.k === 'flowers') drawFlowers(p, o.v);
+      else if (o.k === 'mailbox') drawMailbox(p);
+      else if (o.k === 'lantern') drawLantern(p);
+      else if (o.k === 'cube') drawCube(p, o.v);
+      else if (o.k === 'arch') drawArch(p);
+    }
+  }
+
+  requestAnimationFrame(frame);
+
+  function beep(freq, dur) {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      var ac = new AC();
+      var o = ac.createOscillator();
+      var g = ac.createGain();
+      o.frequency.value = freq || 660;
+      g.gain.value = 0.05;
+      o.connect(g); g.connect(ac.destination);
+      o.start();
+      o.stop(ac.currentTime + (dur || 0.08));
+    } catch (e) {}
+  }
+
+  var dialog = document.getElementById('dialog');
+  function showDialog(title, body) {
+    document.getElementById('dlgTitle').textContent = title;
+    document.getElementById('dlgBody').textContent = body;
+    dialog.classList.add('show');
+  }
+  document.getElementById('dlgOk').addEventListener('click', function () { dialog.classList.remove('show'); beep(880, 0.05); });
+  dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.classList.remove('show'); });
+
+  function resetWalk() { cam.z = 0; cam.x = 0; paused = false; setWalkLabel(); beep(520, 0.08); }
+
+  function toggleBob() {
+    bob = !bob;
+    var el = document.getElementById('vBob');
+    el.classList.toggle('checked', bob);
+    el.textContent = 'Step Bob';
+    beep(440, 0.05);
+  }
+
+  function goSleep() {
+    sleep = !sleep;
+    document.body.classList.toggle('sleep', sleep);
+    setWalkLabel();
+    if (sleep) {
+      document.getElementById('statusbar').querySelectorAll('.st').forEach(function (s) {
+        s.dataset.t = s.textContent;
+        s.textContent = 'asleep \u2003 \u2716 click to wake';
+      });
+    } else {
+      document.querySelectorAll('.statusbar .st').forEach(function (s) {
+        s.textContent = s.dataset.t || s.textContent;
+      });
+    }
+    beep(330, 0.1);
+  }
+
+  var menus = document.querySelectorAll('.menu');
+  menus.forEach(function (m) {
+    var t = m.querySelector('.mt');
+    if (!t) return;
+    t.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var was = m.classList.contains('open');
+      menus.forEach(function (x) { x.classList.remove('open'); });
+      if (!was) m.classList.add('open');
+    });
+  });
+  document.addEventListener('click', function () {
+    menus.forEach(function (x) { x.classList.remove('open'); });
+  });
+  document.getElementById('mApple').querySelector('.apple-menu').addEventListener('click', function (e) {
+    e.preventDefault();
+  });
+  document.querySelector('.apple-menu svg').addEventListener('click', function (e) {
+    e.stopPropagation();
+    var m = document.getElementById('mApple');
+    var was = m.classList.contains('open');
+    menus.forEach(function (x) { x.classList.remove('open'); });
+    if (!was) m.classList.add('open');
+  });
+
+  document.addEventListener('click', function (e) {
+    var item = e.target.closest('.sub button');
+    if (!item || item.classList.contains('dim')) return;
+    if (item.closest('.menu') === document.getElementById('mApple')) {
+      var m = document.getElementById('mApple');
+      if (m.contains(item) && !m.classList.contains('open')) return;
+    }
+    var act = item.getAttribute('data-action');
+    menus.forEach(function (x) { x.classList.remove('open'); });
+    if (act === 'about') showDialog('About This Garden', 'Rimer London presents an endless OS9 garden. Walk for ever. Do not walk the same tree twice. Some things may float. \u2726');
+    else if (act === 'beep') beep(660, 0.06);
+    else if (act === 'reset') resetWalk();
+    else if (act === 'print') beep(523, 0.1);
+    else if (act === 'bob') toggleBob();
+    else if (act === 'uv') showDialog('Unlimited Walk', 'Unlimited Walk is already on. This garden is infinite.');
+    else if (act === 'sleep') goSleep();
+  });
+
+  document.getElementById('closeBox').addEventListener('click', function (e) {
+    e.stopPropagation();
+    goSleep();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.code === 'Space') { e.preventDefault(); paused = !paused; setWalkLabel(); beep(440, 0.04); }
+    if (e.code === 'KeyS') goSleep();
+    if (e.code === 'KeyR') resetWalk();
+  });
+})();
+</script>
+</body>
+</html>
