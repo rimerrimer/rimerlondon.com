@@ -3,7 +3,7 @@
 Static portfolio for https://rimerlondon.com — hosted on GitHub Pages (custom domain `rimerlondon.com`, apex primary, `www` -> apex).
 
 ## Structure
-- `index.html` — landing (Mac menubar)
+- `index.html` — landing (full-screen 3D forest, link-trees = navigation)
 - `portfolio/index.html` — video grid (fetches `portfolio/videos.json`)
 - `portfolio/videos/` — mp4 + jpg posters
 - `portfolio/videos.json` — ordered source of truth: `{file, title, info}` — edit this when adding videos
