@@ -64,6 +64,18 @@
   nav.rail a:nth-child(6):hover { color: #ff8f3c; text-shadow: 0 0 14px #ff8f3c; }
   nav.rail a:nth-child(7):hover { color: #7dff4d; text-shadow: 0 0 14px #7dff4d; }
   nav.rail a:focus-visible { color: var(--ink); outline: none; }
+  nav.rail a { position: relative; }
+  nav.rail a::after {
+    content: attr(data-label);
+    position: absolute; left: 50%; bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    background: rgba(10,0,20,.35); border: 1px solid rgba(242,244,232,.10);
+    padding: 1px 8px; font-size: 16px; letter-spacing: .06em;
+    color: rgba(242,244,232,.55); white-space: nowrap;
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s ease;
+  }
+  nav.rail a:hover::after, nav.rail a:focus-visible::after { opacity: .9; }
   nav.rail a svg { width: 22px; height: 22px; display: block; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   nav.rail a svg .fill { fill: currentColor; stroke: none; }
 
@@ -87,22 +99,22 @@
 
 <!-- Navigation (keyboard, touch, no-WebGL fallback). -->
 <nav class="rail" aria-label="Links">
-  <a href="/portfolio">Portfolio</a>
-  <a href="https://soundcloud.com/rimer" target="_blank" rel="noopener" aria-label="SoundCloud">
+  <a href="https://soundcloud.com/rimer" target="_blank" rel="noopener" aria-label="SoundCloud" data-label="SoundCloud">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4.5 4.5 0 1 1 .8-8.9A5.5 5.5 0 0 1 18.5 10 3.5 3.5 0 0 1 17.5 18H7z"/></svg>
   </a>
-  <a href="https://www.mixcloud.com/rimer-london/" target="_blank" rel="noopener" aria-label="Mixcloud">
+  <a href="https://www.mixcloud.com/rimer-london/" target="_blank" rel="noopener" aria-label="Mixcloud" data-label="Mixcloud">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4.5 4.5 0 1 1 .8-8.9A5.5 5.5 0 0 1 18.5 10 3.5 3.5 0 0 1 17.5 18H7z"/><path class="fill" d="M10.5 12.5v4l3.5-2z"/></svg>
   </a>
-  <a href="https://music.apple.com/nl/artist/rimer-london/351480381" target="_blank" rel="noopener" aria-label="Apple Music">
+  <a href="https://music.apple.com/nl/artist/rimer-london/351480381" target="_blank" rel="noopener" aria-label="Apple Music" data-label="Apple Music">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18.5V7l10-2v11.5"/><circle cx="6.8" cy="18.5" r="2.2"/><circle cx="16.8" cy="16.5" r="2.2"/></svg>
   </a>
-  <a href="https://open.spotify.com/artist/4Kdb6rwgdSPx0P2AUhvdee" target="_blank" rel="noopener" aria-label="Spotify">
+  <a href="https://open.spotify.com/artist/4Kdb6rwgdSPx0P2AUhvdee" target="_blank" rel="noopener" aria-label="Spotify" data-label="Spotify">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 10.2c2.8-1 6-1 8.5.2M8.3 13c2.3-.7 4.8-.6 7 .3M8.8 15.7c1.9-.5 3.8-.4 5.7.3"/></svg>
   </a>
-  <a href="https://instagram.com/rimerlondon" target="_blank" rel="noopener" aria-label="Instagram">
+  <a href="https://instagram.com/rimerlondon" target="_blank" rel="noopener" aria-label="Instagram" data-label="Instagram">
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="12" r="3.8"/><circle class="fill" cx="17.2" cy="6.8" r="1" stroke="none"/></svg>
   </a>
+  <a href="/portfolio" data-label="portfolio">Work$</a>
 </nav>
 
 <noscript>
