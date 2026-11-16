@@ -30,9 +30,7 @@
   #forest { position: fixed; inset: 0; }
   #forest canvas {
     display: block; width: 100%; height: 100%;
-    animation: hue 80s linear infinite;
   }
-  @keyframes hue { to { filter: hue-rotate(360deg); } }
 
   .vignette {
     position: fixed; inset: 0; pointer-events: none; z-index: 2;
@@ -71,7 +69,7 @@
     position: absolute; left: 50%; bottom: calc(100% + 8px);
     transform: translateX(-50%);
     background: rgba(10,0,20,.35); border: 1px solid rgba(242,244,232,.10);
-    padding: 1px 8px; font-size: 17px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+    padding: 3px 8px; font-family: system-ui, -apple-system, sans-serif; font-size: 12px; font-weight: 400; letter-spacing: .02em; text-transform: none;
     color: rgba(242,244,232,.55); white-space: nowrap;
     opacity: 0; pointer-events: none;
     transition: opacity .35s ease;
@@ -81,6 +79,17 @@
   nav.rail a svg .fill { fill: currentColor; stroke: none; }
 
   @keyframes riseC { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+  #sound {
+    position: fixed; right: 18px; bottom: 18px; z-index: 10;
+    font-family: system-ui, -apple-system, sans-serif; font-size: 12px;
+    color: rgba(255,255,255,.6); background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.18); border-radius: 999px;
+    padding: 7px 14px; cursor: pointer; letter-spacing: .04em;
+    transition: color .3s, border-color .3s;
+  }
+  #sound:hover { color: #fff; border-color: rgba(255,255,255,.45); }
+  #sound.off { display: none; }
 
   @media (max-width: 620px) {
     nav.rail { gap: 2px 18px; bottom: 16px; }
@@ -117,6 +126,9 @@
   </a>
   <a href="/portfolio" class="port">Portfolio</a>
 </nav>
+
+<button id="sound" type="button">sound &#9834;</button>
+<audio id="au" preload="auto"></audio>
 
 <noscript>
   <p style="position:fixed;inset:auto 0 120px;text-align:center;z-index:11">Rimer London — use the links below.</p>
@@ -191,7 +203,7 @@ for (let i = 0; i < N; i++) {
   pos[i * 3] = Math.cos(a) * r;
   pos[i * 3 + 1] = Math.sin(a) * r;
   pos[i * 3 + 2] = z;
-  // mostly white / blue-white / warm stars, low saturation
+  // stars: white / blue-white / warm, low saturation
   const warm = Math.random() < 0.25;
   col.setHSL(warm ? 0.11 : 0.58 + Math.random() * 0.08, Math.random() * 0.35, 0.72 + Math.random() * 0.26);
   clr[i * 3] = col.r; clr[i * 3 + 1] = col.g; clr[i * 3 + 2] = col.b;
@@ -291,6 +303,43 @@ function drawGrain(now) {
   gg.putImageData(grainImg, 0, 0);
 }
 
+/* ---------- background music + audio reactivity ---------- */
+const TRACKS = ['au/1.m4a', 'au/2.m4a', 'au/3.m4a'];
+const au = document.getElementById('au');
+const soundBtn = document.getElementById('sound');
+let trackIdx = 0;
+try {
+  trackIdx = parseInt(localStorage.getItem('rl-au-index') || '0', 10) % TRACKS.length;
+  localStorage.setItem('rl-au-index', String((trackIdx + 1) % TRACKS.length)); // reload = next track
+} catch (e) {}
+au.src = TRACKS[trackIdx];
+au.addEventListener('ended', () => {
+  trackIdx = (trackIdx + 1) % TRACKS.length;
+  try { localStorage.setItem('rl-au-index', String((trackIdx + 1) % TRACKS.length)); } catch (e) {}
+  au.src = TRACKS[trackIdx];
+  au.play().catch(() => {});
+});
+
+let actx = null, analyser = null, freq = null, audioOn = false;
+let bass = 0, mid = 0, treb = 0;
+function startAudio() {
+  if (audioOn) { if (actx) actx.resume(); return; }
+  try {
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = actx.createMediaElementSource(au);
+    analyser = actx.createAnalyser();
+    analyser.fftSize = 256;
+    src.connect(analyser); analyser.connect(actx.destination);
+    freq = new Uint8Array(analyser.frequencyBinCount);
+    audioOn = true;
+  } catch (e) {}
+  au.play().then(() => soundBtn.classList.add('off')).catch(() => {});
+}
+au.addEventListener('play', () => soundBtn.classList.add('off'));
+soundBtn.addEventListener('click', startAudio);
+addEventListener('pointerdown', startAudio, { once: true });
+startAudio(); // autoplay attempt; falls back to the sound button
+
 /* ---------- loop ---------- */
 const clock = new THREE.Clock();
 let t = 0, lettersPaused = false;
@@ -304,7 +353,16 @@ function tick(now) {
   const dt = Math.min(clock.getDelta(), 0.05);
   t += dt;
 
+  if (analyser && freq) {
+    analyser.getByteFrequencyData(freq);
+    const avg = (a, b) => { let s = 0; for (let i = a; i < b; i++) s += freq[i]; return s / ((b - a) * 255); };
+    bass += (avg(1, 6) - bass) * 0.22;
+    mid += (avg(6, 22) - mid) * 0.18;
+    treb += (avg(22, 64) - treb) * 0.15;
+  }
+
   tunnel.rotation.z += SPIN * dt;
+  tunnel.scale.setScalar(1 + bass * 0.08);
   for (const r of rings) {
     r.position.z += SPEED * dt;
     if (r.position.z > 6) r.position.z -= SPAN;
@@ -326,18 +384,18 @@ function tick(now) {
   pGeo.attributes.position.needsUpdate = true;
 
   for (const f of floaters) {
-    if (!lettersPaused) f.t += (SPEED / SPAN) * dt * 0.5;
+    if (!lettersPaused) f.t += (SPEED / SPAN) * dt * 0.5 * (0.6 + bass * 1.2);
     if (f.t > 1) f.t -= 1;
     const z = -260 + f.t * 266;
     const a = f.phase + f.t * 7.5;         // twist as it approaches = spiral
     f.sp.position.set(Math.cos(a) * f.radius, Math.sin(a) * f.radius, z);
-    f.sp.material.opacity = Math.min(1, f.t * 3.5, (1 - f.t) * 4) * 0.5;
+    f.sp.material.opacity = Math.min(1, f.t * 3.5, (1 - f.t) * 4) * 0.75;
   }
 
-  camera.position.x = Math.sin(t * 0.1) * 0.35;
-  camera.position.y = Math.cos(t * 0.08) * 0.35;
+  camera.position.x = Math.sin(t * 0.1) * 0.35 * (1 + mid * 0.5);
+  camera.position.y = Math.cos(t * 0.08) * 0.35 * (1 + mid * 0.5);
   camera.lookAt(0, 0, -20);
-  glow.material.opacity = 0.65 + Math.sin(t * 0.45) * 0.15;
+  glow.material.opacity = 0.65 + Math.sin(t * 0.45) * 0.15 + treb * 0.3;
 
   drawGrain(now);
   renderer.render(scene, camera);
