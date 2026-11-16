@@ -114,7 +114,7 @@
   <a href="https://instagram.com/rimerlondon" target="_blank" rel="noopener" aria-label="Instagram" data-label="Instagram">
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="12" r="3.8"/><circle class="fill" cx="17.2" cy="6.8" r="1" stroke="none"/></svg>
   </a>
-  <a href="/portfolio" data-label="portfolio">Work$</a>
+  <a href="/portfolio">Portfolio</a>
 </nav>
 
 <noscript>
@@ -179,8 +179,8 @@ function helixTube(phase, color) {
 }
 tunnel.add(helixTube(0, 0xff4ecd), helixTube(2.1, 0x4dffd2), helixTube(4.2, 0xffe14d));
 
-/* ---------- spiral particle vortex ---------- */
-const N = 2400;
+/* ---------- spiral starfield ---------- */
+const N = 7000;
 const pos = new Float32Array(N * 3), clr = new Float32Array(N * 3), zz = new Float32Array(N);
 for (let i = 0; i < N; i++) {
   const z = 4 - Math.random() * SPAN;
@@ -190,7 +190,9 @@ for (let i = 0; i < N; i++) {
   pos[i * 3] = Math.cos(a) * r;
   pos[i * 3 + 1] = Math.sin(a) * r;
   pos[i * 3 + 2] = z;
-  col.setHSL(((i * 0.013) % 1), 1, 0.65);
+  // mostly white / blue-white / warm stars, low saturation
+  const warm = Math.random() < 0.25;
+  col.setHSL(warm ? 0.11 : 0.58 + Math.random() * 0.08, Math.random() * 0.35, 0.72 + Math.random() * 0.26);
   clr[i * 3] = col.r; clr[i * 3 + 1] = col.g; clr[i * 3 + 2] = col.b;
 }
 const pGeo = new THREE.BufferGeometry();
@@ -201,11 +203,12 @@ const dotCanvas = document.createElement('canvas'); dotCanvas.width = dotCanvas.
   const dg = dotCanvas.getContext('2d');
   const dgrad = dg.createRadialGradient(16, 16, 0, 16, 16, 16);
   dgrad.addColorStop(0, 'rgba(255,255,255,1)');
-  dgrad.addColorStop(0.5, 'rgba(255,255,255,.4)');
+  dgrad.addColorStop(0.55, 'rgba(255,255,255,.85)');
+  dgrad.addColorStop(0.8, 'rgba(255,255,255,.3)');
   dgrad.addColorStop(1, 'rgba(255,255,255,0)');
   dg.fillStyle = dgrad; dg.fillRect(0, 0, 32, 32);
 }
-const vortex = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.28, map: new THREE.CanvasTexture(dotCanvas), vertexColors: true, transparent: true, opacity: 0.95, depthWrite: false }));
+const vortex = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.10, map: new THREE.CanvasTexture(dotCanvas), vertexColors: true, transparent: true, opacity: 0.9, depthWrite: false }));
 tunnel.add(vortex);
 
 /* ---------- centre glow ---------- */
