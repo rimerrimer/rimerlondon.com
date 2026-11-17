@@ -465,9 +465,12 @@ addEventListener('pointerdown', () => { if (sctx && sctx.state !== 'running') sc
 let sfxEl = null;
 function playSampleMedia() {
   try {
-    if (!sfxEl) sfxEl = new Audio();
+    if (!sfxEl) {
+      sfxEl = new Audio();
+      sfxEl.preservesPitch = false; sfxEl.mozPreservesPitch = false; sfxEl.webkitPreservesPitch = false; // speed moves pitch too
+    }
     sfxEl.src = SAMPLE_FILES[(Math.random() * SAMPLE_FILES.length) | 0];
-    sfxEl.playbackRate = 0.5 + Math.random() * 0.6; // -50% … +10% speed
+    sfxEl.playbackRate = 0.5 + Math.random() * 0.6; // -50% … +10% speed (and pitch)
     sfxEl.volume = 0.6;
     sfxEl.play().catch(() => {});
   } catch (e) {}
