@@ -100,6 +100,8 @@
   }
   .controls button:hover { color: #fff; text-shadow: 0 0 12px rgba(242,244,232,.6); }
   .controls button svg { width: 34px; height: 34px; display: block; }
+  #skipBtn { opacity: 0; pointer-events: none; transition: opacity 1.5s ease, color .3s, text-shadow .3s; }
+  #skipBtn.show { opacity: 1; pointer-events: auto; }
   .controls button::after {
     content: attr(data-label);
     position: absolute; left: 50%; top: calc(100% + 6px);
@@ -622,10 +624,12 @@ gate.addEventListener('pointerdown', () => {
     fadeTo(cur, 1, 2500); // smooth slow start
     gateIcon.innerHTML = ICON_PAUSE;
     gate.setAttribute('aria-label', 'Click the centre to stop');
+    skipBtn.classList.add('show'); // next button fades in once playing
   } else {
     fadeTo(cur, 0, 1400, () => { cur.pause(); spare.pause(); }); // halt
     gateIcon.innerHTML = ICON_PLAY;
     gate.setAttribute('aria-label', 'Click the centre to start');
+    skipBtn.classList.remove('show');
   }
 });
 
